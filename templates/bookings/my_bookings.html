@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}حجوزاتي — منصة حجز المشاريع{% endblock %}
+{% block content %}
+<h1>حجوزاتي</h1>
+
+{% if bookings %}
+<div class="cards-grid">
+  {% for booking in bookings %}
+  <div class="card booking-card">
+    <div class="idea-card-head">
+      <span class="badge badge-{{ booking.status }}">{{ booking.get_status_display }}</span>
+      <span class="category-chip">{{ booking.idea.category.name }}</span>
+    </div>
+    <h2><a href="{{ booking.idea.get_absolute_url }}">{{ booking.idea.title }}</a></h2>
+    <p class="muted">تاريخ الحجز: {{ booking.created_at|date:"Y/m/d H:i" }}</p>
+
+    <ul class="team-list compact">
+      <li>
+        <span class="member-name">{{ booking.student.display_name }}</span>
+        <span class="member-role">قائد الفريق</span>
+      </li>
+      {% for m in booking.members.all %}
+      <li>
+        <span class="member-name">{{ m.full_name }}</span>
+        {% if m.university_number %}<span class="member-num">#{{ m.university_number }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% if booking.is_active %}
+    <form method="post" action="{% url 'bookings:cancel' booking.pk %}" class="inline-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger btn-sm">إلغاء الحجز</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty card">
+  <p>لم تحجز أي فكرة بعد.</p>
+  <a href="{% url 'ideas:list' %}" class="btn btn-primary">تصفح الأفكار المتاحة</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}حذف فكرة — منصة حجز المشاريع{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <h1>حذف فكرة «{{ idea.title }}»</h1>
+  <p class="msg msg-warning">هل أنت متأكد من حذف هذه الفكرة؟ لا يمكن التراجع عن هذا الإجراء.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="actions">
+      <button type="submit" class="btn btn-danger">نعم، احذف</button>
+      <a href="{{ idea.get_absolute_url }}" class="btn btn-ghost">تراجع</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}إنشاء حساب — منصة حجز المشاريع{% endblock %}
+{% block content %}
+<div class="auth-card card">
+  <h1>إنشاء حساب طالب</h1>
+  <p class="muted">سجّل حسابك لتتمكن من حجز أفكار المشاريع.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<small class="help">{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary btn-block">إنشاء الحساب</button>
+  </form>
+  <p class="auth-alt">لديك حساب؟ <a href="{% url 'accounts:login' %}">سجّل الدخول</a></p>
+</div>
+{% endblock %}

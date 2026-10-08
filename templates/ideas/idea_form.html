@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{% if idea %}تعديل فكرة{% else %}إضافة فكرة{% endif %} — منصة حجز المشاريع{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <h1>{% if idea %}تعديل: {{ idea.title }}{% else %}إضافة فكرة مشروع جديدة{% endif %}</h1>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}
+      </div>
+    {% endfor %}
+    <div class="actions">
+      <button type="submit" class="btn btn-primary">{% if idea %}حفظ التعديلات{% else %}إضافة الفكرة{% endif %}</button>
+      <a href="{% if idea %}{{ idea.get_absolute_url }}{% else %}{% url 'ideas:list' %}{% endif %}" class="btn btn-ghost">إلغاء</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

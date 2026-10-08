@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ idea.title }} — منصة حجز المشاريع{% endblock %}
+{% block content %}
+<article class="card idea-detail">
+  <div class="idea-card-head">
+    <span class="badge badge-{{ idea.status }}">{{ idea.get_status_display }}</span>
+    <span class="category-chip">{{ idea.category.name }}</span>
+  </div>
+  <h1>{{ idea.title }}</h1>
+  <div class="idea-meta">
+    <span>👥 حتى {{ idea.max_members }} أعضاء</span>
+    {% if idea.supervisor %}<span>🧑‍🏫 المشرف: {{ idea.supervisor.display_name }}</span>{% endif %}
+    <span>🗓 {{ idea.created_at|date:"Y/m/d" }}</span>
+  </div>
+  <div class="description">{{ idea.description|linebreaks }}</div>
+
+  {% if user.is_supervisor %}
+  <div class="actions">
+    <a href="{% url 'ideas:edit' idea.slug %}" class="btn btn-ghost">تعديل</a>
+    <a href="{% url 'ideas:delete' idea.slug %}" class="btn btn-danger">حذف</a>
+  </div>
+  {% endif %}
+</article>
+
+{# ---- حالة الفريق الحالي ---- #}
+{% if active_booking %}
+<div class="card team-card">
+  <h2>الفريق الحائز على الفكرة</h2>
+  <p class="muted">
+    هذا الحجز
+    {% if active_booking.status == "pending" %}<strong>بانتظار موافقة المشرف</strong>
+    {% else %}<strong>معتمد</strong>{% endif %}.
+  </p>
+  <ul class="team-list">
+    <li>
+      <span class="member-name">{{ active_booking.student.display_name }}</span>
+      <span class="member-role">قائد الفريق</span>
+      {% if active_booking.student.university_number %}
+        <span class="member-num">#{{ active_booking.student.university_number }}</span>
+      {% endif %}
+    </li>
+    {% for m in active_booking.members.all %}
+    <li>
+      <span class="member-name">{{ m.full_name }}</span>
+      <span class="member-role">{{ m.get_role_display }}</span>
+      {% if m.university_number %}<span class="member-num">#{{ m.university_number }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{# ---- نموذج الحجز ---- #}
+{% if can_book %}
+<div class="card booking-form-card" id="book-form">
+  <h2>احجز هذه الفكرة لفريقك</h2>
+  <p class="muted">اكتب أسماء أعضاء الفريق (عدا أنت — أنت قائد الفريق تلقائياً). الحد الأقصى {{ idea.max_members }} أعضاء.</p>
+  <form method="post" action="{% url 'ideas:book' idea.slug %}">
+    {% csrf_token %}
+    <div class="field">
+      <label for="id_note">ملاحظة للمشرف (اختياري)</label>
+      <textarea name="note" id="id_note" rows="2" placeholder="مثال: فريق من المستوى الثالث، لدينا خبرة سابقة في..."></textarea>
+    </div>
+
+    <label class="sublabel">أعضاء الفريق</label>
+    <div id="member-rows">
+      <div class="member-row">
+        <input type="text" name="member_name" placeholder="الاسم الكامل" required>
+        <input type="text" name="member_number" placeholder="الرقم الجامعي (اختياري)">
+        <button type="button" class="btn btn-danger btn-sm remove-row" title="حذف">✕</button>
+      </div>
+    </div>
+    <div class="row-actions">
+      <button type="button" id="add-row" class="btn btn-ghost btn-sm">+ إضافة عضو</button>
+      <small class="muted">الأعضاء المضافون: <span id="member-count">1</span> من {{ idea.max_members|add:"-1" }} متاحين</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block">إرسال طلب الحجز</button>
+  </form>
+</div>
+{% endif %}
+
+{# ---- حجزي السابق على هذه الفكرة ---- #}
+{% if my_booking %}
+<div class="card">
+  <h2>حجزك على هذه الفكرة</h2>
+  <p>الحالة: <span class="badge badge-{{ my_booking.status }}">{{ my_booking.get_status_display }}</span></p>
+  {% if my_booking.is_active %}
+  <form method="post" action="{% url 'bookings:cancel' my_booking.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">إلغاء حجزي</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/booking.js' %}"></script>
+<script>
+  window.MAX_MEMBERS = {{ idea.max_members }};
+</script>
+{% endblock %}

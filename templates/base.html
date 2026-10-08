@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}منصة حجز أفكار المشاريع{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="{% url 'ideas:list' %}" class="brand">📚 حجز المشاريع</a>
+    <nav class="nav">
+      <a href="{% url 'ideas:list' %}">الأفكار</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'bookings:mine' %}">حجوزاتي</a>
+        {% if user.is_supervisor %}
+          <a href="{% url 'supervisor:dashboard' %}">لوحة المشرف</a>
+        {% endif %}
+        {% if user.is_staff %}
+          <a href="/admin/">الإدارة</a>
+        {% endif %}
+        <span class="nav-user">{{ user.display_name }}</span>
+        <form method="post" action="{% url 'accounts:logout' %}" class="inline-form">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-ghost btn-sm">خروج</button>
+        </form>
+      {% else %}
+        <a href="{% url 'accounts:login' %}">تسجيل الدخول</a>
+        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">إنشاء حساب</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="container main">
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="msg msg-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <div class="container">منصة حجز أفكار المشاريع الجامعية — {{ site_name|default:"مشروع جامعي" }}</div>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

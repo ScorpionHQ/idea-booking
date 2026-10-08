@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}أفكار المشاريع — منصة حجز المشاريع{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>أفكار المشاريع المتاحة</h1>
+  {% if user.is_supervisor %}
+    <a href="{% url 'ideas:add' %}" class="btn btn-primary">+ إضافة فكرة</a>
+  {% endif %}
+</div>
+
+<form method="get" class="filters card">
+  <div class="filter-row">
+    <div class="field field-inline">
+      <label for="{{ form.q.id_for_label }}">بحث</label>
+      {{ form.q }}
+    </div>
+    <div class="field field-inline">
+      <label for="{{ form.category.id_for_label }}">التصنيف</label>
+      {{ form.category }}
+    </div>
+    <div class="field field-inline">
+      <label for="{{ form.status.id_for_label }}">الحالة</label>
+      {{ form.status }}
+    </div>
+    <button type="submit" class="btn btn-primary">تصفية</button>
+    <a href="{% url 'ideas:list' %}" class="btn btn-ghost">إعادة تعيين</a>
+  </div>
+</form>
+
+{% if ideas %}
+<div class="cards-grid">
+  {% for idea in ideas %}
+  <a class="card idea-card" href="{{ idea.get_absolute_url }}">
+    <div class="idea-card-head">
+      <span class="badge badge-{{ idea.status }}">{{ idea.get_status_display }}</span>
+      <span class="category-chip">{{ idea.category.name }}</span>
+    </div>
+    <h2>{{ idea.title }}</h2>
+    <p class="muted clamp">{{ idea.description }}</p>
+    <div class="idea-meta">
+      <span>👥 حتى {{ idea.max_members }} أعضاء</span>
+      {% if idea.supervisor %}<span>🧑‍🏫 {{ idea.supervisor.display_name }}</span>{% endif %}
+      {% if idea.active_booking %}
+        <span class="muted">حُجزت بـ {{ idea.active_booking.team_size }} أعضاء</span>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty card">
+  <p>لا توجد أفكار مطابقة. جرّب تغيير عوامل التصفية.</p>
+</div>
+{% endif %}
+{% endblock %}

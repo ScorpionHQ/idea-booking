@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}لوحة المشرف — منصة حجز المشاريع{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>لوحة المشرف</h1>
+  <a href="{% url 'ideas:add' %}" class="btn btn-primary">+ إضافة فكرة</a>
+</div>
+
+<section class="card">
+  <h2>حجوزات بانتظار قرارك</h2>
+  {% if pending_bookings %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>الفكرة</th>
+            <th>الطالب الحائز</th>
+            <th>الفريق</th>
+            <th>التاريخ</th>
+            <th>القرار</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for booking in pending_bookings %}
+          <tr>
+            <td><a href="{{ booking.idea.get_absolute_url }}">{{ booking.idea.title }}</a></td>
+            <td>
+              {{ booking.student.display_name }}
+              {% if booking.student.university_number %}<br><small class="muted">#{{ booking.student.university_number }}</small>{% endif %}
+            </td>
+            <td>
+              <ul class="team-list compact">
+                {% for m in booking.members.all %}
+                <li>
+                  <span class="member-name">{{ m.full_name }}</span>
+                  {% if m.university_number %}<span class="member-num">#{{ m.university_number }}</span>{% endif %}
+                </li>
+                {% endfor %}
+                {% if not booking.members.all %}<li class="muted">بلا أعضاء إضافيين</li>{% endif %}
+              </ul>
+              <small class="muted">الحجم: {{ booking.team_size }}/{{ booking.idea.max_members }}</small>
+            </td>
+            <td>{{ booking.created_at|date:"Y/m/d H:i" }}</td>
+            <td class="decision-cell">
+              <form method="post" action="{% url 'supervisor:decide' booking.pk 'approve' %}" class="inline-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-sm">✓ اعتماد</button>
+              </form>
+              <form method="post" action="{% url 'supervisor:decide' booking.pk 'reject' %}" class="inline-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">✕ رفض</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="muted">لا توجد حجوزات معلقة حالياً.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{% if user.is_admin_role %}كل الأفكار{% else %}أفكاري{% endif %}</h2>
+  {% if my_ideas %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>الفكرة</th>
+          <th>التصنيف</th>
+          <th>الحالة</th>
+          <th>الحجوزات</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for idea in my_ideas %}
+        <tr>
+          <td><a href="{{ idea.get_absolute_url }}">{{ idea.title }}</a></td>
+          <td>{{ idea.category.name }}</td>
+          <td><span class="badge badge-{{ idea.status }}">{{ idea.get_status_display }}</span></td>
+          <td>{{ idea.bookings.count }}</td>
+          <td><a href="{% url 'ideas:edit' idea.slug %}" class="btn btn-ghost btn-sm">تعديل</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted">لم تُضف أي فكرة بعد — ابدأ بإضافة فكرة.</p>
+  {% endif %}
+</section>
+{% endblock %}
