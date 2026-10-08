@@ -156,6 +156,9 @@ LOGOUT_REDIRECT_URL = "/"
 SESSION_COOKIE_AGE = int(_env("SESSION_COOKIE_AGE", "28800"))
 SESSION_SAVE_EVERY_REQUEST = True
 
+# ضمان وجود مجلد السجلات (Git لا يحفظ المجلدات الفارغة)
+(BASE_DIR / "logs").mkdir(exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
