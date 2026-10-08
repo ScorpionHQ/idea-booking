@@ -18,8 +18,7 @@ git commit -m "منصة حجز أفكار المشاريع — الإصدار ا
 
 ```powershell
 git remote add origin https://github.com/YOURUSERNAME/idea-booking.git
-git branch -M main
-git push -u origin main
+git push -u origin master
 ```
 
 > يمكنك بدلاً من ذلك رفع المشروع كملف ZIP من PythonAnywhere (Upload file).
